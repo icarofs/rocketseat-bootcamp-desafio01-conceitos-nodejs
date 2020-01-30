@@ -12,6 +12,25 @@ const projetos = [
   }
 ];
 
+function checkProjetoExistente(req, res, next) {
+  const { id } = req.params;
+  const projeto = projetos.find(p => p.id == id);
+
+  if (!projeto) {
+    return res.status(400).json({ error: "Project not found" });
+  }
+
+  return next();
+}
+
+function requisicoes(req, res, next) {
+  console.count("Requisições");
+
+  return next();
+}
+
+app.use(requisicoes);
+
 app.get("/projetos", (req, res) => {
   return res.json(projetos);
 });
@@ -30,7 +49,7 @@ app.post("/projetos", (req, res) => {
   return res.json(projetos);
 });
 
-app.post("/projetos/:id/tasks", (req, res) => {
+app.post("/projetos/:id/tasks", checkProjetoExistente, (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
 
@@ -41,7 +60,7 @@ app.post("/projetos/:id/tasks", (req, res) => {
   return res.json(projeto);
 });
 
-app.put("/projetos/:id", (req, res) => {
+app.put("/projetos/:id", checkProjetoExistente, (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
 
@@ -52,12 +71,12 @@ app.put("/projetos/:id", (req, res) => {
   return res.json(projeto);
 });
 
-app.delete("/projetos/:id", (req, res) => {
+app.delete("/projetos/:id", checkProjetoExistente, (req, res) => {
   const { id } = req.params;
 
-  const projectIndex = projetos.findIndex(p => p.id == id);
+  const index = projetos.findIndex(p => p.id == id);
 
-  projetos.splice(projectIndex, 1);
+  projetos.splice(index, 1);
 
   return res.send("Deletado com sucesso!");
 });
